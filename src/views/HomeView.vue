@@ -30,60 +30,10 @@
       <div class="list">5</div> -->
     </div>
   </main>
-  <!--
-  <div class="popup" v-if="editPopupRef">
-    <div class="bg">
-      <button class="close-btn" @click="editPopupRef = false">X</button>
-      <form class="from" @submit.prevent="submitGoals">
-        <div v-for="(mainGoal, mainIndex) in lists" :key="mainGoal.id" class="goal-item">
-          <input type="text" v-model="mainGoal.goal" placeholder="輸入你的主要目標" />
-          <div class="line"></div>
-
-          <div class="itemBox" v-for="subGoal in mainGoal.subGoals" :key="subGoal.id">
-            <input v-model="subGoal.content" type="text" placeholder="輸入你的短期目標" />
-          </div>
-
-          <button type="button" @click="addSubGoal(mainIndex)">新增短期目標</button>
-        </div>
-
-        <button type="submit">儲存目標</button>
-      </form>
-    </div>
-  </div> -->
-
-  <!-- 新增用 -->
-  <div class="popup" v-if="addPopupRef">
-    <div class="bg">
-      <button class="close-btn" @click="addPopupRef = false">X</button>
-      <form class="from" @submit.prevent="submitNewGoal">
-        <div class="goal-item">
-          <input type="text" placeholder="輸入你的主要目標" v-model="newGoal.goal" />
-          <label for="timing">
-            <input type="number" />
-          </label>
-          <div class="line"></div>
-          <div class="sub-goal">
-            <input type="text" />
-          </div>
-          <button class="submit">確認</button>
-        </div>
-      </form>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, reactive } from "vue";
-
-// 彈窗
-const addPopupRef = ref(false);
-const editPopupRef = ref(false);
-
-const newGoal = reactive({
-  goal: "",
-  id: Date.now(),
-  Timing: "",
-});
 
 const lists = reactive([
   {
@@ -100,30 +50,6 @@ const lists = reactive([
     ],
   },
 ]);
-
-const openPopup = (action, id) => {
-  if (action == "add" && id == 0) {
-    addPopupRef.value = true;
-    // lists.push({
-    //   goal: "",
-    //   id: Date.now(),
-    //   Timing: "",
-    //   subGoals: [
-    //     {
-    //       content: "",
-    //       Timing: "",
-    //       reset: null,
-    //       id: 1,
-    //     },
-    //   ],
-    // });
-  } else {
-    editPopupRef.value = true;
-    // const item = lists.find((i) => {
-    //   return i.id == id;
-    // });
-  }
-};
 </script>
 
 <style lang="scss">
@@ -241,6 +167,11 @@ main {
     border-radius: 25px;
     padding: 15px 0;
     background-color: #e8e8e8;
+
+    .timing {
+      border: 1px solid red;
+      display: flex;
+    }
 
     .submit {
       display: block;
