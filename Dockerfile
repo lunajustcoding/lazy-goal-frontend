@@ -1,6 +1,5 @@
 FROM node:18
 
-
 ENV NPM_HOME="/npm"
 
 ENV ATH="$NPM_HOME:$PATH"

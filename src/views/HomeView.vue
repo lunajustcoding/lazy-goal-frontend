@@ -1,16 +1,32 @@
 <template>
   <main>
-    <h1>懶人計畫</h1>
+    <h1>lazy</h1>
     <button class="btn" @click="openPopup('add', 0)">+</button>
 
     <div class="listBox">
       <div class="list" v-for="mainGoal in lists" :key="mainGoal.id">
         <input type="text" v-if="mainGoal.goal == ''" />
 
-        <b v-if="mainGoal.goal !== ''"
-          >{{ mainGoal.goal }}<span>總時間:{{ mainGoal.Timing }}</span></b
-        >
-        <button class="btn" @click="openPopup('edit', mainGoal.id)">編輯</button>
+        <div class="top">
+          <b v-if="mainGoal.goal !== ''" class="goal-title"
+            >{{ mainGoal.goal }}<span>總時間:{{ mainGoal.Timing }}</span></b
+          >
+          <div class="btn-box">
+            <button @click="openPopup('edit', mainGoal.id)" class="edit-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="18"
+                width="18"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  fill="#616d8a"
+                  d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160L0 416c0 53 43 96 96 96l256 0c53 0 96-43 96-96l0-96c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7-14.3 32-32 32L96 448c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 64z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
         <div class="line"></div>
         <div class="itemBox" v-for="subGoal in mainGoal.subGoals" :key="subGoal.id">
           <label class="check-box">
@@ -20,7 +36,9 @@
           </label>
           <span class="set-time">{{ subGoal.Timing }}</span>
           <br />
-          <span v-if="subGoal.reset !== null">休息時間：{{ subGoal.reset }}</span>
+          <p v-if="subGoal.reset !== null" class="reset-time">
+            休息時間：{{ subGoal.reset }} 分鐘
+          </p>
         </div>
       </div>
 
@@ -30,6 +48,19 @@
       <div class="list">5</div> -->
     </div>
   </main>
+
+  <div class="popup">
+    <div class="bg">
+      <form action="">
+        <input
+          type="text"
+          class="goal-title"
+          name="goal"
+          placeholder="輸入你的主要目標"
+        />
+      </form>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -67,32 +98,57 @@ main {
   }
   .listBox {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 0.5fr 1fr 0.5fr;
 
     .list {
       border-radius: 15px;
       background-color: #ffffff;
       margin: 15px;
       color: #1b1b1b;
-      height: 35vh;
+      height: auto;
+      padding: 10px 0;
       display: flex;
       flex-direction: column;
 
-      b {
-        text-align: center;
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin-top: 10px;
-        color: #2c3e50;
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .goal-title {
+          text-align: center;
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin-top: 10px;
+          color: #2c3e50;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding-left: 15px;
 
-        span {
-          font-size: 0.9rem;
+          span {
+            font-size: 0.9rem;
+          }
+        }
+
+        .btn-box {
+          padding-right: 10px;
+          button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+          }
         }
       }
 
       .set-time {
         float: right;
         padding-right: 23px;
+      }
+
+      .reset-time {
+        margin: 5px 0;
+        text-align: center;
+        color: #2c3e50;
       }
 
       .check-box {
