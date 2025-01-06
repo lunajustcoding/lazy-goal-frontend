@@ -1,19 +1,15 @@
 FROM node:18
 
 ENV NPM_HOME="/npm"
-
-ENV ATH="$NPM_HOME:$PATH"
-
-RUN corepack enable
-
-EXPOSE 5174
+ENV PATH="$NPM_HOME:$PATH"
 
 WORKDIR /var/www/app
 
 COPY . /var/www/app
 
+RUN corepack enable
 RUN npm install
 
-RUN if [! -e "./package.json"] ; then RUN npm init ;fi
+EXPOSE 5173
 
-CMD [ "npm", "run", "dev" ]
+CMD ["npm", "run", "dev", "--", "--host"]

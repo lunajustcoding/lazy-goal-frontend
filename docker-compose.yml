@@ -1,9 +1,7 @@
-# version: '3'
-
 services:
   lazy-goal-frontend:
     build: .
     container_name: lazy-goal-frontend
     tty: true
     ports:
-      - '80:80'
+      - '5173:5173'
