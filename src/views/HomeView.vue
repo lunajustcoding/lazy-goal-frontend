@@ -45,6 +45,9 @@
       <el-form-item label="主目標">
         <el-input v-model="form.goal" />
       </el-form-item>
+      <el-form-item label="設定總時間">
+        <el-slider v-model="form.reset" :step="10" show-stops />
+      </el-form-item>
       <hr />
       <el-form-item
         class="mt-5"
@@ -71,6 +74,7 @@ const dialogVisible = ref(false);
 
 const form = reactive({
   goal: "",
+  Timing: 0,
   subGoals: [
     {
       content: "",
