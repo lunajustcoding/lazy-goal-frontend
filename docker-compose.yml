@@ -1,7 +1,13 @@
+version: '3'
 services:
-  lazy-goal-frontend:
+  lazy-frontend:
     build: .
-    container_name: lazy-goal-frontend
-    tty: true
+    container_name: lazy-todo
     ports:
       - '5173:5173'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: npm run dev -- --host

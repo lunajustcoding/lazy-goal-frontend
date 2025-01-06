@@ -1,13 +1,8 @@
 FROM node:18
 
-ENV NPM_HOME="/npm"
-ENV PATH="$NPM_HOME:$PATH"
+WORKDIR /app
 
-WORKDIR /var/www/app
-
-COPY . /var/www/app
-
-RUN corepack enable
+COPY package.json package-lock.json ./
 RUN npm install
 
 EXPOSE 5173

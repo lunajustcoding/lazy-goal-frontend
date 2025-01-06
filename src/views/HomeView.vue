@@ -1,7 +1,8 @@
 <template>
   <main>
     <h1>lazy</h1>
-    <button class="btn" @click="openPopup('add', 0)">+</button>
+    <button class="btn" @click="openPopup">+</button>
+    <el-button plain @click="dialogVisible = true"> Click to open the Dialog </el-button>
 
     <div class="listBox">
       <div class="list" v-for="mainGoal in lists" :key="mainGoal.id">
@@ -12,19 +13,9 @@
             >{{ mainGoal.goal }}<span>總時間:{{ mainGoal.Timing }}</span></b
           >
           <div class="btn-box">
-            <button @click="openPopup('edit', mainGoal.id)" class="edit-btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="18"
-                width="18"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  fill="#616d8a"
-                  d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160L0 416c0 53 43 96 96 96l256 0c53 0 96-43 96-96l0-96c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7-14.3 32-32 32L96 448c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 64z"
-                />
-              </svg>
-            </button>
+            <el-button @click="openPopup('edit', mainGoal.id)" class="edit-btn">
+              <el-icon> <Edit /> </el-icon
+            ></el-button>
           </div>
         </div>
         <div class="line"></div>
@@ -41,30 +32,54 @@
           </p>
         </div>
       </div>
-
-      <!-- <div class="list">2</div>
-      <div class="list">3</div>
-      <div class="list">4</div>
-      <div class="list">5</div> -->
     </div>
   </main>
 
-  <div class="popup">
-    <div class="bg">
-      <form action="">
-        <input
-          type="text"
-          class="goal-title"
-          name="goal"
-          placeholder="輸入你的主要目標"
-        />
-      </form>
-    </div>
-  </div>
+  <el-dialog
+    v-model="dialogVisible"
+    title="新增目標"
+    width="500"
+    :before-close="handleClose"
+  >
+    <el-form :model="form" label-width="auto" style="max-width: 600px">
+      <el-form-item label="主目標">
+        <el-input v-model="form.goal" />
+      </el-form-item>
+      <hr />
+      <el-form-item
+        class="mt-5"
+        label="小目標"
+        v-for="item in form.subGoals"
+        :key="item.id"
+      >
+        <el-input v-model="form.item" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">儲存</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
 import { ref, reactive } from "vue";
+
+const dialogVisible = ref(false);
+
+const form = reactive({
+  goal: "",
+  subGoals: [
+    {
+      content: "",
+      Timing: "",
+      reset: 10,
+      id: 1,
+    },
+  ],
+});
 
 const lists = reactive([
   {
@@ -81,6 +96,10 @@ const lists = reactive([
     ],
   },
 ]);
+
+const openPopup = () => {
+  dialogVisible.value = true;
+};
 </script>
 
 <style lang="scss">
