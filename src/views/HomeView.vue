@@ -1,8 +1,7 @@
 <template>
   <main>
     <h1>lazy</h1>
-    <button class="btn" @click="openPopup">+</button>
-    <el-button plain @click="dialogVisible = true"> Click to open the Dialog </el-button>
+    <button class="btn" @click="dialogVisible = true">+</button>
 
     <div class="listBox">
       <div class="list" v-for="mainGoal in lists" :key="mainGoal.id">
@@ -14,7 +13,7 @@
           >
           <div class="btn-box">
             <el-button @click="openPopup('edit', mainGoal.id)" class="edit-btn">
-              <el-icon> <Edit /> </el-icon
+              <el-icon :size="20"> <Edit /> </el-icon
             ></el-button>
           </div>
         </div>
@@ -41,7 +40,7 @@
     width="500"
     :before-close="handleClose"
   >
-    <el-form :model="form" label-width="auto" style="max-width: 600px">
+    <el-form :model="form" label-width="auto" style="max-width: 500px">
       <el-form-item label="主目標">
         <el-input v-model="form.goal" />
       </el-form-item>
@@ -49,19 +48,62 @@
         <el-slider v-model="form.reset" :step="10" show-stops />
       </el-form-item>
       <hr />
-      <el-form-item
-        class="mt-5"
-        label="小目標"
-        v-for="item in form.subGoals"
-        :key="item.id"
-      >
-        <el-input v-model="form.item" />
-      </el-form-item>
+      <div v-if="step == 0">
+        <div v-for="item in form.subGoals" :key="item.id">
+          <el-form-item class="mt-5" label="小目標" v-if="item.type === 'item'">
+            <el-row :gutter="20">
+              <el-col :span="20">
+                <el-input v-model="item.content" />
+              </el-col>
+              <el-col :span="1">
+                <el-button @click="deleteItem(item.id)">
+                  <el-icon><Delete /></el-icon
+                ></el-button>
+              </el-col>
+            </el-row>
+          </el-form-item>
+
+          <el-form-item class="mt-5" label="休息時間" v-if="item.type === 'rest'">
+            <el-tooltip content="<span>若不設定休息時間可輸入0</span>" raw-content>
+              <el-icon class="mr-3"><Warning /></el-icon>
+            </el-tooltip>
+            <el-input-number
+              v-model="item.reset"
+              :step="5"
+              max="15"
+              min="0"
+              step-strictly
+              class="mr-3"
+            />
+            分鐘
+            <el-button @click="deleteItem(item.id)" class="ml-5">
+              <el-icon><Delete /></el-icon
+            ></el-button>
+          </el-form-item>
+        </div>
+      </div>
+      <div v-if="step == 1">
+        <el-form-item label="標籤" class="mt-5">
+          <el-input-tag
+            v-model="form.hastag"
+            draggable
+            placeholder="若無請去設定新增hastag"
+            aria-label="Please click the Enter key after input"
+          />
+        </el-form-item>
+      </div>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">儲存</el-button>
+        <div v-if="step == 0">
+          <el-button @click="addRest">新增休息</el-button>
+          <el-button @click="addItem">新增小目標</el-button>
+          <el-button type="primary" @click="nextStep">下一頁</el-button>
+        </div>
+        <div v-if="step == 1">
+          <el-button @click="backStep">回上一頁</el-button>
+          <el-button type="primary" @click="save">儲存</el-button>
+        </div>
       </div>
     </template>
   </el-dialog>
@@ -70,11 +112,16 @@
 <script setup>
 import { ref, reactive } from "vue";
 
+const step = ref(0);
+const totalSteps = ref(1);
+
 const dialogVisible = ref(false);
 
 const form = reactive({
   goal: "",
   Timing: 0,
+  hastag: ["讀書", "運動"],
+
   subGoals: [
     {
       content: "",
@@ -94,7 +141,6 @@ const lists = reactive([
       {
         content: "把冰箱發霉的檸檬拿去丟",
         Timing: "05:00",
-        reset: 10,
         id: 1,
       },
     ],
@@ -103,6 +149,37 @@ const lists = reactive([
 
 const openPopup = () => {
   dialogVisible.value = true;
+};
+
+const addItem = () => {
+  form.subGoals.push({
+    type: "item",
+    content: "",
+    id: Date.now(),
+  });
+};
+
+const addRest = () => {
+  form.subGoals.push({
+    type: "rest",
+    id: Date.now(),
+    reset: 10,
+  });
+};
+
+const deleteItem = (id) => {
+  const index = form.subGoals.findIndex((i) => i.id == id);
+  if (index !== -1) {
+    form.subGoals.splice(index, 1);
+  }
+};
+
+const nextStep = () => {
+  step.value++;
+};
+
+const backStep = () => {
+  step.value--;
 };
 </script>
 
