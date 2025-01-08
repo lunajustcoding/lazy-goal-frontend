@@ -6,27 +6,38 @@
     <div class="listBox">
       <div class="list" v-for="mainGoal in lists" :key="mainGoal.id">
         <input type="text" v-if="mainGoal.goal == ''" />
-
         <div class="top">
           <b v-if="mainGoal.goal !== ''" class="goal-title"
-            >{{ mainGoal.goal }}<span>總時間:{{ mainGoal.Timing }}</span></b
+            >{{ mainGoal.goal }}<span>總時間: {{ mainGoal.timing }} 分鐘</span></b
+          >
+          <el-tag type="danger" effect="dark" v-if="mainGoal.priority == 'high'"
+            >高優先</el-tag
+          >
+          <el-tag type="warning" effect="dark" v-if="mainGoal.priority == 'medium'"
+            >中等</el-tag
+          >
+          <el-tag type="success" effect="dark" v-if="mainGoal.priority == 'low'"
+            >一般</el-tag
           >
           <div class="btn-box">
-            <el-button @click="openPopup('edit', mainGoal.id)" class="edit-btn">
+            <el-button @click="openEdit(mainGoal.id)" class="edit-btn">
               <el-icon :size="20"> <Edit /> </el-icon
             ></el-button>
           </div>
         </div>
         <div class="line"></div>
         <div class="itemBox" v-for="subGoal in mainGoal.subGoals" :key="subGoal.id">
-          <label class="check-box">
+          <label class="check-box" v-if="subGoal.type == 'item'">
             <input type="checkbox" />
-            <input type="text" v-if="subGoal.content == ''" />
-            <span v-else>{{ subGoal.content }}</span>
+            <span
+              >{{ subGoal.content }}
+              <p class="set-time" v-if="subGoal.timing !== undefined">
+                {{ subGoal.timing }} m
+              </p></span
+            >
           </label>
-          <span class="set-time">{{ subGoal.Timing }}</span>
-          <br />
-          <p v-if="subGoal.reset !== null" class="reset-time">
+
+          <p v-if="subGoal.type == 'rest'" class="reset-time">
             休息時間：{{ subGoal.reset }} 分鐘
           </p>
         </div>
@@ -45,16 +56,30 @@
         <el-input v-model="form.goal" />
       </el-form-item>
       <el-form-item label="設定總時間">
-        <el-slider v-model="form.reset" :step="10" show-stops />
+        <el-slider v-model="form.timing" :step="10" show-stops />
       </el-form-item>
       <hr />
       <div v-if="step == 0">
         <div v-for="item in form.subGoals" :key="item.id">
-          <el-form-item class="mt-5" label="小目標" v-if="item.type === 'item'">
+          <el-form-item class="mt-5" v-if="item.type === 'item'">
             <el-row :gutter="20">
-              <el-col :span="20">
+              <el-col :span="1">
+                <el-icon :size="20"><EditPen /> </el-icon>
+              </el-col>
+
+              <el-col :span="8">
                 <el-input v-model="item.content" />
               </el-col>
+              <el-col :span="10">
+                <el-input-number
+                  v-model="item.reset"
+                  :step="5"
+                  max="15"
+                  min="0"
+                  step-strictly
+                />
+              </el-col>
+
               <el-col :span="1">
                 <el-button @click="deleteItem(item.id)">
                   <el-icon><Delete /></el-icon
@@ -63,10 +88,9 @@
             </el-row>
           </el-form-item>
 
-          <el-form-item class="mt-5" label="休息時間" v-if="item.type === 'rest'">
-            <el-tooltip content="<span>若不設定休息時間可輸入0</span>" raw-content>
-              <el-icon class="mr-3"><Warning /></el-icon>
-            </el-tooltip>
+          <el-form-item class="mt-5" v-if="item.type === 'rest'">
+            <el-icon class="mr-3" :size="20"><Timer /></el-icon>
+
             <el-input-number
               v-model="item.reset"
               :step="5"
@@ -83,11 +107,24 @@
         </div>
       </div>
       <div v-if="step == 1">
+        <el-form-item label="優先程度" class="mt-5">
+          <el-radio-group v-model="form.priority">
+            <el-radio value="high"
+              ><el-tag type="danger" effect="dark">高優先</el-tag></el-radio
+            >
+            <el-radio value="medium"
+              ><el-tag type="warning" effect="dark">中等</el-tag></el-radio
+            >
+            <el-radio value="low"
+              ><el-tag type="success" effect="dark">一般</el-tag></el-radio
+            >
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="標籤" class="mt-5">
           <el-input-tag
-            v-model="form.hastag"
+            v-model="form.hashtag"
             draggable
-            placeholder="若無請去設定新增hastag"
+            placeholder="若無請去設定新增hashtag"
             aria-label="Please click the Enter key after input"
           />
         </el-form-item>
@@ -102,7 +139,7 @@
         </div>
         <div v-if="step == 1">
           <el-button @click="backStep">回上一頁</el-button>
-          <el-button type="primary" @click="save">儲存</el-button>
+          <el-button type="primary" @click="saveGoal">儲存目標</el-button>
         </div>
       </div>
     </template>
@@ -113,42 +150,39 @@
 import { ref, reactive } from "vue";
 
 const step = ref(0);
-const totalSteps = ref(1);
+// const totalSteps = ref(1);
 
 const dialogVisible = ref(false);
 
 const form = reactive({
   goal: "",
-  Timing: 0,
-  hastag: ["讀書", "運動"],
-
-  subGoals: [
-    {
-      content: "",
-      Timing: "",
-      reset: 10,
-      id: 1,
-    },
-  ],
+  timing: 0,
+  hashtag: [],
+  priority: "",
+  subGoals: [],
 });
 
 const lists = reactive([
   {
     goal: "整理房間",
     id: Date.now(),
-    Timing: "01:30:00",
+    timing: "01:30:00",
+    hashtag: [],
+    priority: "",
     subGoals: [
+      { type: "item", content: "123", id: Date.now(), timing: 10 },
       {
-        content: "把冰箱發霉的檸檬拿去丟",
-        Timing: "05:00",
-        id: 1,
+        type: "rest",
+        id: Date.now(),
+        reset: 10,
       },
     ],
   },
 ]);
 
-const openPopup = () => {
-  dialogVisible.value = true;
+const openEdit = (id) => {
+  const item = lists.findIndex((i) => i.id == id);
+  console.log(item);
 };
 
 const addItem = () => {
@@ -172,6 +206,12 @@ const deleteItem = (id) => {
   if (index !== -1) {
     form.subGoals.splice(index, 1);
   }
+};
+
+const saveGoal = () => {
+  lists.push(form);
+  dialogVisible.value = false;
+  console.log(lists);
 };
 
 const nextStep = () => {
@@ -198,7 +238,7 @@ main {
   }
   .listBox {
     display: grid;
-    grid-template-columns: 0.5fr 1fr 0.5fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
 
     .list {
       border-radius: 15px;
