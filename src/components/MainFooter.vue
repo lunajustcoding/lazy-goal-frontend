@@ -1,9 +1,11 @@
 <template>
-  <hr />
-  <p>
-    © Luna
-    {{ year }} 製作
-  </p>
+  <footer class="mt-5">
+    <hr />
+    <p>
+      © Luna
+      {{ year }} 製作
+    </p>
+  </footer>
 </template>
 <style lang="scss" scoped></style>
 <script setup>
