@@ -1,80 +1,87 @@
 <template>
-  <header>
-    <h1>lazy</h1>
-  </header>
-  <main>
-    <div class="list h-auto p-5">
-      <div class="titleBox box">
-        <p class="text-center text-base font-bold">📋我的待辦事項</p>
-      </div>
-      <div class="inputBox text-center m-3 flex item-center justify-center">
-        <input
-          type="text"
-          placeholder="請輸入新的事項"
-          class="text-base outline-none"
-          v-model="inputRef"
-        />
-        <button class="ml-3 border-none bg-transparent cursor-pointer" @click="addItem">
-          <el-icon><Plus /></el-icon>
-        </button>
-      </div>
-      <div class="todoBox justify-center flex flex-col items-left m-3">
-        <label
-          class="check-box flex items-left justify-between"
-          v-for="item in list"
-          :key="item.id"
-        >
-          <div class="text-box">
-            <input type="checkBox" :value="item.checked" />
-            <span class="ml-1">{{ item.content }}</span>
-          </div>
-          <button
-            class="border-none bg-transparent color-red font-medium cursor-pointer"
-            @click="deleteItem(item.id)"
+  <div class="wrap">
+    <header>
+      <h1>lazy</h1>
+    </header>
+    <main>
+      <div class="list h-auto p-5">
+        <div class="titleBox box">
+          <p class="text-center text-base font-bold">📋我的待辦事項</p>
+        </div>
+        <div class="inputBox text-center m-3 flex item-center justify-center">
+          <input
+            type="text"
+            placeholder="請輸入新的事項"
+            class="text-base outline-none"
+            v-model="inputRef"
+          />
+          <button class="ml-3 border-none bg-transparent cursor-pointer" @click="addItem">
+            <el-icon><Plus /></el-icon>
+          </button>
+        </div>
+        <div class="todoBox justify-center flex flex-col items-left m-3">
+          <label
+            class="check-box flex items-left justify-between"
+            v-for="item in list"
+            :key="item.id"
           >
-            <el-icon><Close /></el-icon>
-          </button>
-        </label>
-        <label class="check-box flex items-center justify-between">
-          <div class="text-box">
-            <input type="checkBox" value="" /><span class="ml-1"
-              >買奇異果給家裡的狗吃</span
+            <div class="text-box">
+              <input type="checkBox" :value="item.checked" />
+              <span class="ml-1">{{ item.content }}</span>
+            </div>
+            <button
+              class="border-none bg-transparent color-red font-medium cursor-pointer"
+              @click="deleteItem(item.id)"
             >
+              <el-icon><Close /></el-icon>
+            </button>
+          </label>
+          <label class="check-box flex items-center justify-between">
+            <div class="text-box">
+              <input type="checkBox" value="" /><span class="ml-1"
+                >買奇異果給家裡的狗吃</span
+              >
+            </div>
+            <button
+              class="border-none bg-transparent color-red font-medium cursor-pointer"
+            >
+              <el-icon><Close /></el-icon>
+            </button>
+          </label>
+        </div>
+        <hr />
+        <div class="tomatoBox box m-3">
+          <p class="text-base font-bold">🍅專注模式</p>
+          <p class="text-3xl m-3 font-bold">⏳{{ fomatTimer }}</p>
+          <div class="playBox w-50 flex items-center justify-around">
+            <button @click="startTimer" :disabled="isRunning">▶️開始</button>
+            <button @click="pauseTimer" :disabled="!isRunning">⏸️暫停</button>
+            <button @click="resetTimer">🔁重置</button>
           </div>
-          <button class="border-none bg-transparent color-red font-medium cursor-pointer">
-            <el-icon><Close /></el-icon>
+        </div>
+        <hr />
+        <div class="music" v-if="playmusicRef">
+          <audio src="src/assets/done.wav" type="audio/wav" autoplay></audio>
+        </div>
+        <div class="totalBox box m-3">
+          <p>番茄數量: 3</p>
+          <button
+            class="border-none bg-transparent cursor-pointer color-gray-400"
+            @click="doneShow"
+          >
+            [ {{ doneShowRef.text }}已完成事項 ]
           </button>
-        </label>
-      </div>
-      <hr />
-      <div class="tomatoBox box m-3">
-        <p class="text-base font-bold">🍅專注模式</p>
-        <p class="text-3xl m-3 font-bold">⏳{{ fomatTimer }}</p>
-        <div class="playBox w-50 flex items-center justify-around">
-          <button @click="startTimer" :disabled="isRunning">▶️開始</button>
-          <button @click="pauseTimer" :disabled="!isRunning">⏸️暫停</button>
-          <button @click="resetTimer">🔁重置</button>
+          <div
+            class="doneList w-80 h-auto max-h-90px overflow-auto border flex flex-col items-center"
+            v-if="doneShowRef.switch"
+          >
+            <p>✔️睡午覺( 1 🍅)</p>
+            <p>✔️去洗碗( 2 🍅)</p>
+          </div>
         </div>
       </div>
-      <hr />
-      <div class="totalBox box m-3">
-        <p>番茄數量: 3</p>
-        <button
-          class="border-none bg-transparent cursor-pointer color-gray-400"
-          @click="doneShow"
-        >
-          [ {{ doneShowRef.text }}已完成事項 ]
-        </button>
-        <div
-          class="doneList w-80 h-auto max-h-90px overflow-auto border flex flex-col items-center"
-          v-if="doneShowRef.switch"
-        >
-          <p>✔️睡午覺( 1 🍅)</p>
-          <p>✔️去洗碗( 2 🍅)</p>
-        </div>
-      </div>
-    </div>
-  </main>
+    </main>
+  </div>
 </template>
 
 <script setup>
@@ -87,8 +94,8 @@ const doneShowRef = ref({
   switch: false,
 });
 const inputRef = ref("");
-
-const totalSecRef = ref(1 * 60);
+const playmusicRef = ref(false);
+const totalSecRef = ref(25 * 60);
 const isRunning = ref(false);
 
 let timer = null;
@@ -102,10 +109,12 @@ const fomatTimer = computed(() => {
 const startTimer = () => {
   if (!isRunning.value) {
     isRunning.value = true;
+    playmusicRef.value = false;
     timer = setInterval(() => {
       if (totalSecRef.value > 0) {
         totalSecRef.value--;
       } else {
+        playmusicRef.value = true;
         resetTimer();
       }
     }, 1000);
